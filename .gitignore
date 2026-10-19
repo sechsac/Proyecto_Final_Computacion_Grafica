@@ -399,3 +399,19 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# prueba para usar modelos blender .obj y carpetas debug
+#  Proyecto final - Computación Gráfica (Equipo 10)
+# 
+# Modelos 3D: la regla *.obj de arriba es para archivos de
+# compilación, pero nuestros modelos también son .obj
+!resources/**/*.obj
+!resources/**/*.mtl
+
+# Librerías externas: subir todo, aunque haya carpetas
+# llamadas x64, Debug, bin, etc.
+!External/**
+
+# Respaldos automáticos de Blender (no sirven en el repo)
+*.blend1
+*.blend2
