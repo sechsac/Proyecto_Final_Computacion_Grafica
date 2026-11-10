@@ -415,3 +415,13 @@ FodyWeavers.xsd
 # Respaldos automáticos de Blender (no sirven en el repo)
 *.blend1
 *.blend2
+
+# --- Correcciones (Equipo 10) ---
+# Nuestros modelos están en ProyectoFinal/Models: subir .obj y .mtl
+!ProyectoFinal/Models/**/*.obj
+!ProyectoFinal/Models/**/*.mtl
+# La carpeta real de librerías se llama "External Libraries".
+# GLEW está en lib/Release/Win32, que las reglas de Release/ y Win32/ ignoraban.
+!External Libraries/**
+!External Libraries/GLEW/lib/Release/
+!External Libraries/GLEW/lib/Release/Win32/

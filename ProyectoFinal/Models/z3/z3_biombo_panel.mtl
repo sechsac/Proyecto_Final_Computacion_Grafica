@@ -1,0 +1,24 @@
+# Blender 5.2.2 LTS MTL File: 'z3_biombo_panel.blend'
+# www.blender.org
+
+newmtl Marco
+map_Kd madera_oscura.png
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.024158 0.010330 0.006049
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl papel
+map_Kd papel_hanji.png
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.806952 0.715694 0.527115
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
