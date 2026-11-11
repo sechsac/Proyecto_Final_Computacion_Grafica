@@ -234,7 +234,7 @@ public:
         // ---------- 2. Pedestales con fruta ----------
         for (int i = 0; i < NUM_JEGI; i++) {
             glm::mat4 mJegi = glm::translate(base, glm::vec3(JEGI_X[i], ALTURA_MESA, JEGI_Z));
-            pintar(jegi, mJegi, texLaca);
+            pintar(jegi, glm::scale(mJegi, glm::vec3(0.8f)), texLaca);
             // Hongdong-baekseo: frutas rojas al este (derecha del visitante)
             if (JEGI_X[i] > 0.1f) dibujarPiramide(pintar, mJegi);
         }
