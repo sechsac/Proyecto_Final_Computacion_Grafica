@@ -44,7 +44,7 @@ const float ALTURA_MESA = 0.70f;                 // superficie de la jesasang
 const float JEGI_Z = 0.15f;
 const float JEGI_X[] = { -0.40f, -0.20f, 0.0f, 0.20f, 0.40f };
 const int   NUM_JEGI = 5;
-const float ALTURA_PLATO_JEGI = 0.105f;          // fondo del plato del pedestal
+const float ALTURA_PLATO_JEGI = 0.084f;          // fondo del plato (pedestal escalado a 0.8)
 const float ESCALA_MANZANA = 0.7f;               // el .obj quedó de 12 cm; 0.7 -> 8.5 cm
                                                  // (si la vuelves a exportar a 8.5 cm, pon 1.0f)
 
@@ -129,7 +129,9 @@ public:
         texMaderaClara  = cargarTextura("madera_clara.png");
         texLaca         = cargarTextura("laca_roja.png");
         texPapel        = cargarTextura("papel_hanji.png");
-        texTela         = cargarTextura("tela_canamo.png");
+        texTela         = cargarTextura("tela_canamo.png");   // sangbok de cáñamo
+        texCara         = cargarTextura("cara_doliente.png"); // cara, cabello y sujil
+        texEstera       = cargarTextura("estera_paja.png");   // estera dotjari
 
         // ---------- Animación 1 (KeyFrames): se prepara el altar ----------
         // El biombo se despliega panel por panel y las puertas del cofre
@@ -273,7 +275,7 @@ public:
 
         glm::mat4 mTorso = rotX(glm::translate(mCadera, CINTURA), animJeol.valor(V_TORSO));
         pintar(torso, mTorso, texTela);
-        pintar(cabeza, rotX(glm::translate(mTorso, CUELLO), animJeol.valor(V_CABEZA)), texTela);
+        pintar(cabeza, rotX(glm::translate(mTorso, CUELLO), animJeol.valor(V_CABEZA)), texCara);
 
         glm::mat4 mBI = rotX(glm::translate(mTorso, HOMBRO_IZQ), -animJeol.valor(V_HOMBRO));
         pintar(brazoIzq, mBI, texTela);
@@ -289,7 +291,9 @@ public:
         pintar(musloDer, mMD, texTela);
         pintar(piernaDer, rotX(glm::translate(mMD, RODILLA), animJeol.valor(V_RODILLA)), texTela);
 
-        pintar(cojin, glm::translate(base, POS_DOLIENTE), texTela);
+        // Estera de paja delgada (2.5 cm) y más larga que el cojín original
+        pintar(cojin, glm::scale(glm::translate(base, POS_DOLIENTE + glm::vec3(0.0f, 0.0f, -0.10f)),
+                                 glm::vec3(1.5f, 0.3f, 2.2f)), texEstera);
 
         glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -331,7 +335,7 @@ private:
     ModeloPtr musloIzq, musloDer, piernaIzq, piernaDer;
 
     GLuint texMaderaOscura = 0, texMaderaMesa = 0, texMaderaClara = 0;
-    GLuint texLaca = 0, texPapel = 0, texTela = 0;
+    GLuint texLaca = 0, texPapel = 0, texTela = 0, texCara = 0, texEstera = 0;
 
     Animator animAltar;
     Animator animJeol;
