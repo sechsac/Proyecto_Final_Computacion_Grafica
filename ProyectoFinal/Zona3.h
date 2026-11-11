@@ -143,13 +143,10 @@ public:
         texTela         = cargarTextura("tela_canamo.png");   // sangbok de cáñamo
         texCara         = cargarTextura("cara_doliente.png"); // cara, cabello y sujil
         texEstera       = cargarTextura("estera_paja.png");   // estera dotjari
-        texCaqui        = cargarTextura("caqui.png");
         texCastana      = cargarTextura("castana.png");
         texAzufaifa     = cargarTextura("azufaifa.png");
         texPescado      = cargarTextura("pescado.png");
         texLaton        = cargarTextura("laton.png");
-        texTazon        = cargarTextura("tazon.png");
-        texTteok        = cargarTextura("tteok.png");
 
         // ---------- Animación 1 (KeyFrames): se prepara el altar ----------
         // El biombo se despliega panel por panel y las puertas del cofre
@@ -264,7 +261,7 @@ public:
             case 1: dibujarMonton(pintar, mPlato, castana,  texCastana,  0.026f, 0.018f); break;
             case 2: dibujarPiramide(pintar, mPlato, pera,    0,        0.056f, 0.060f, 1.0f); break;
             case 3: dibujarPiramide(pintar, mPlato, caqui,   texCaqui, 0.070f, 0.040f, 1.0f); break;
-            case 4: dibujarPiramide(pintar, mPlato, manzana, 0,        0.085f, 0.065f, ESCALA_MANZANA); break;
+            case 4: dibujarPiramide(pintar, mPlato, manzana, 0,        0.060f, 0.045f, ESCALA_MANZANA); break;
             }
         }
 
