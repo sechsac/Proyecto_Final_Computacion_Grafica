@@ -102,6 +102,17 @@ public:
         mesa      = cargarModelo("z3_jesasang.obj");
         jegi      = cargarModelo("z3_jegi.obj");
         manzana   = cargarModelo("z3_manzana.obj");
+        // Comida de la mesa
+        pera       = cargarModelo("z3_pera.obj");
+        caqui      = cargarModelo("z3_caqui.obj");
+        castana    = cargarModelo("z3_castana.obj");
+        azufaifa   = cargarModelo("z3_azufaifa.obj");
+        pescado    = cargarModelo("z3_pescado.obj");
+        platoLargo = cargarModelo("z3_plato_largo.obj");
+        tteok      = cargarModelo("z3_tteok.obj");
+        tazonArroz = cargarModelo("z3_tazon_arroz.obj");
+        tazonSopa  = cargarModelo("z3_tazon_sopa.obj");
+        copa       = cargarModelo("z3_copa.obj");
         cojin     = cargarModelo("z3_cojin.obj");
         incensario= cargarModelo("z3_incensario.obj");
         panel     = cargarModelo("z3_biombo_panel.obj");
@@ -132,6 +143,13 @@ public:
         texTela         = cargarTextura("tela_canamo.png");   // sangbok de cáñamo
         texCara         = cargarTextura("cara_doliente.png"); // cara, cabello y sujil
         texEstera       = cargarTextura("estera_paja.png");   // estera dotjari
+        texCaqui        = cargarTextura("caqui.png");
+        texCastana      = cargarTextura("castana.png");
+        texAzufaifa     = cargarTextura("azufaifa.png");
+        texPescado      = cargarTextura("pescado.png");
+        texLaton        = cargarTextura("laton.png");
+        texTazon        = cargarTextura("tazon.png");
+        texTteok        = cargarTextura("tteok.png");
 
         // ---------- Animación 1 (KeyFrames): se prepara el altar ----------
         // El biombo se despliega panel por panel y las puertas del cofre
@@ -165,11 +183,12 @@ public:
 
         hotspots.push_back({ glm::vec3(-0.9f, 0.0f, 0.8f), 0.9f,
             "La mesa ritual (Jesasang)",
-            "Tradicionalmente la mesa se orienta hacia el norte. En la fila más cercana al "
-            "ancestro van el arroz, la sopa y las copas de licor; en medio, carnes, pescados y "
-            "verduras (namul); al frente, frutas y dulces sobre pedestales de madera (jegi). "
-            "Reglas como Hongdong-baekseo (frutas rojas al este, blancas al oeste) ordenan los "
-            "platillos. Se evitan el ajo, el chile y el durazno.",
+            "Tradicionalmente la mesa se orienta hacia el norte y sigue reglas de acomodo. "
+            "Al frente van las frutas: Jo-yul-i-si (azufaifa, castaña, pera y caqui de oeste "
+            "a este) y Hongdong-baekseo (frutas rojas al este, blancas al oeste). En medio, "
+            "el pescado va al este con la cabeza hacia el este (Eodong-yukseo, Dudong-mihseo). "
+            "Atrás, el arroz va al oeste y la sopa al este (Banseo-gaengdong), junto a la copa "
+            "de licor que se ofrece al ancestro. Se evitan el ajo, el chile y el durazno.",
             "" });
 
         hotspots.push_back({ glm::vec3(0.9f, 0.0f, 0.8f), 0.9f,
@@ -233,13 +252,36 @@ public:
         // ---------- 1. Mesa ----------
         pintar(mesa, base, texMaderaMesa);
 
-        // ---------- 2. Pedestales con fruta ----------
+        // ---------- 2. Fila del frente: frutas en pedestales ----------
+        // Jo-yul-i-si, de oeste a este (izquierda a derecha del visitante):
+        // azufaifas, castañas, peras, caquis y manzanas (rojas al este).
         for (int i = 0; i < NUM_JEGI; i++) {
             glm::mat4 mJegi = glm::translate(base, glm::vec3(JEGI_X[i], ALTURA_MESA, JEGI_Z));
             pintar(jegi, glm::scale(mJegi, glm::vec3(0.8f)), texLaca);
-            // Hongdong-baekseo: frutas rojas al este (derecha del visitante)
-            if (JEGI_X[i] > 0.1f) dibujarPiramide(pintar, mJegi);
+            glm::mat4 mPlato = glm::translate(mJegi, glm::vec3(0.0f, ALTURA_PLATO_JEGI, 0.0f));
+            switch (i) {
+            case 0: dibujarMonton(pintar, mPlato, azufaifa, texAzufaifa, 0.023f, 0.024f); break;
+            case 1: dibujarMonton(pintar, mPlato, castana,  texCastana,  0.026f, 0.018f); break;
+            case 2: dibujarPiramide(pintar, mPlato, pera,    0,        0.056f, 0.060f, 1.0f); break;
+            case 3: dibujarPiramide(pintar, mPlato, caqui,   texCaqui, 0.070f, 0.040f, 1.0f); break;
+            case 4: dibujarPiramide(pintar, mPlato, manzana, 0,        0.085f, 0.065f, ESCALA_MANZANA); break;
+            }
         }
+
+        // ---------- 2b. Fila media: pescado al este, tteok al oeste ----------
+        // Eodong-yukseo y Dudong-mihseo: pescado al este, con la cabeza hacia el este.
+        glm::mat4 mPlatoLargo = glm::translate(base, glm::vec3(0.30f, ALTURA_MESA, -0.02f));
+        pintar(platoLargo, mPlatoLargo, texLaca);
+        pintar(pescado, glm::translate(mPlatoLargo, glm::vec3(0.0f, 0.06f, 0.0f)), texPescado);
+        glm::mat4 mTteok = glm::translate(base, glm::vec3(-0.30f, ALTURA_MESA, -0.02f));
+        pintar(jegi, glm::scale(mTteok, glm::vec3(0.8f)), texLaca);
+        pintar(tteok, glm::translate(mTteok, glm::vec3(0.0f, ALTURA_PLATO_JEGI, 0.0f)), texTteok);
+
+        // ---------- 2c. Fila de atrás: arroz al oeste, sopa al este, copa al centro ----------
+        // Banseo-gaengdong: arroz al oeste y sopa al este.
+        pintar(tazonArroz, glm::translate(base, glm::vec3(-0.24f, ALTURA_MESA, -0.24f)), texTazon);
+        pintar(tazonSopa,  glm::translate(base, glm::vec3( 0.24f, ALTURA_MESA, -0.24f)), texTazon);
+        pintar(copa,       glm::translate(base, glm::vec3( 0.00f, ALTURA_MESA, -0.05f)), texLaton);
 
         // ---------- 3. Incensario al frente (si existe) ----------
         pintar(incensario, glm::translate(base, glm::vec3(0.0f, ALTURA_MESA, 0.28f)), texMaderaOscura);
@@ -330,12 +372,14 @@ private:
     using ModeloPtr = std::unique_ptr<Model>;
 
     ModeloPtr mesa, jegi, manzana, cojin, incensario, panel;
+    ModeloPtr pera, caqui, castana, azufaifa, pescado, platoLargo, tteok, tazonArroz, tazonSopa, copa;
     ModeloPtr cofre, puertaIzq, puertaDer, tableta;
     ModeloPtr cadera, torso, cabeza, brazoIzq, brazoDer, antebrazoIzq, antebrazoDer;
     ModeloPtr musloIzq, musloDer, piernaIzq, piernaDer;
 
     GLuint texMaderaOscura = 0, texMaderaMesa = 0, texMaderaClara = 0;
     GLuint texLaca = 0, texPapel = 0, texTela = 0, texCara = 0, texEstera = 0;
+    GLuint texCaqui = 0, texCastana = 0, texAzufaifa = 0, texPescado = 0, texLaton = 0, texTazon = 0, texTteok = 0;
 
     Animator animAltar;
     Animator animJeol;
@@ -345,21 +389,44 @@ private:
     bool infoAbierta = false;
     glm::vec3 camara = glm::vec3(0.0f);
 
+    // Pirámide de 4 frutas: 3 abajo y 1 arriba.
+    //   d = ancho de la fruta, alto = cuánto sube la de arriba, esc = escala del modelo
     template <typename F>
-    void dibujarPiramide(F& pintar, const glm::mat4& mJegi) {
+    void dibujarPiramide(F& pintar, const glm::mat4& mPlato, const ModeloPtr& fruta,
+                         GLuint tex, float d, float alto, float esc) {
         using namespace z3;
-        if (!manzana) return;
+        if (!fruta) return;
+        const float r = 0.6f * d;
         const glm::vec3 pos[4] = {
-            glm::vec3(-0.045f, ALTURA_PLATO_JEGI,          -0.026f),
-            glm::vec3( 0.045f, ALTURA_PLATO_JEGI,          -0.026f),
-            glm::vec3( 0.000f, ALTURA_PLATO_JEGI,           0.052f),
-            glm::vec3( 0.000f, ALTURA_PLATO_JEGI + 0.065f,  0.000f) };
+            glm::vec3(-0.866f * r, 0.0f, -0.5f * r),
+            glm::vec3( 0.866f * r, 0.0f, -0.5f * r),
+            glm::vec3( 0.0f,       0.0f,  r),
+            glm::vec3( 0.0f,       alto,  0.0f) };
         for (int k = 0; k < 4; k++) {
-            glm::mat4 m = glm::translate(mJegi, pos[k]);
-            m = rotY(m, 70.0f * k);                       // que no se vean idénticas
-            m = glm::scale(m, glm::vec3(ESCALA_MANZANA));
-            pintar(manzana, m, 0);                        // la manzana trae su propia textura
+            glm::mat4 m = rotY(glm::translate(mPlato, pos[k]), 70.0f * k);   // que no se vean idénticas
+            pintar(fruta, glm::scale(m, glm::vec3(esc)), tex);
         }
+    }
+
+    // Montón de frutos pequeños (azufaifas, castañas): 7 + 3 + 1.
+    //   d = separación entre frutos, alto = altura de cada capa
+    template <typename F>
+    void dibujarMonton(F& pintar, const glm::mat4& mPlato, const ModeloPtr& fruto,
+                       GLuint tex, float d, float alto) {
+        using namespace z3;
+        if (!fruto) return;
+        std::vector<glm::vec3> pos = { glm::vec3(0.0f) };
+        for (int k = 0; k < 6; k++) {
+            float a = glm::radians(60.0f * k);
+            pos.push_back(glm::vec3(d * cos(a), 0.0f, d * sin(a)));
+        }
+        for (int k = 0; k < 3; k++) {
+            float a = glm::radians(120.0f * k + 30.0f);
+            pos.push_back(glm::vec3(0.58f * d * cos(a), alto, 0.58f * d * sin(a)));
+        }
+        pos.push_back(glm::vec3(0.0f, 2.0f * alto, 0.0f));
+        for (size_t k = 0; k < pos.size(); k++)
+            pintar(fruto, rotY(glm::translate(mPlato, pos[k]), 47.0f * k), tex);
     }
 
     static bool existe(const std::string& ruta) { return std::ifstream(ruta).good(); }
