@@ -1,22 +1,7 @@
-# Blender 5.0.1 MTL File: 'None'
-# www.blender.org
-
 newmtl madera
-Ns 159.999985
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
+Kd 1 1 1
 map_Kd z2_madera.png
 
 newmtl papel
-Ns 39.999996
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
+Kd 1 1 1
 map_Kd z2_papel.png

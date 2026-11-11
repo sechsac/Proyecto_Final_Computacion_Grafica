@@ -1,5 +1,4 @@
 #pragma once
-//  Zona3.h  -  Sala principal: altar del Jesa
 
 #include <memory>
 #include <vector>
@@ -22,32 +21,28 @@ namespace z3 {
 
 const std::string RUTA = "Models/z3/";
 
-const float ALTURA_MESA = 0.70f;                 // superficie de la jesasang
+const float ALTURA_MESA = 0.70f;
 
-// --- Pedestales jegi (fila al frente de la mesa) ---
 const float JEGI_Z = 0.15f;
 const float JEGI_X[] = { -0.40f, -0.20f, 0.0f, 0.20f, 0.40f };
 const int   NUM_JEGI = 5;
-const float ALTURA_PLATO_JEGI = 0.084f;          // fondo del plato (pedestal escalado a 0.8)
-const float ESCALA_MANZANA = 0.7f;               
+const float ALTURA_PLATO_JEGI = 0.084f;
+const float ESCALA_MANZANA = 0.7f;
 
-// --- Cofre (sinjujip), sobre la mesa, al centro y hacia atrás ---
 const glm::vec3 POS_COFRE(0.0f, ALTURA_MESA, -0.25f);
-const glm::vec3 BISAGRA_IZQ(-0.08f, 0.0f, 0.06f);   
+const glm::vec3 BISAGRA_IZQ(-0.08f, 0.0f, 0.06f);
 const glm::vec3 BISAGRA_DER( 0.08f, 0.0f, 0.06f);
 const float APERTURA_PUERTAS = 110.0f;
 
-// --- Biombo (byeongpung): el panel 0 tiene su bisagra izquierda aquí ---
 const glm::vec3 POS_BIOMBO(-1.20f, 0.0f, -0.90f);
 const float ANCHO_PANEL = 0.45f;
 const int   NUM_PANELES = 6;
-const float PLEGADO = 175.0f;                    // bisagra cerrada (acordeón)
-const float ABIERTO = 30.0f;                     
+const float PLEGADO = 175.0f;
+const float ABIERTO = 30.0f;
 
-// --- Doliente: posición de los pies, frente a la mesa ---
 const glm::vec3 POS_DOLIENTE(0.0f, 0.0f, 1.10f);
 const float     ALTURA_CADERA = 0.95f;
-// Articulaciones
+
 const glm::vec3 CINTURA   ( 0.00f,  0.10f, 0.0f);
 const glm::vec3 CUELLO    ( 0.00f,  0.50f, 0.0f);
 const glm::vec3 HOMBRO_IZQ(-0.20f,  0.45f, 0.0f);
@@ -57,9 +52,8 @@ const glm::vec3 CADERA_IZQ(-0.10f, -0.05f, 0.0f);
 const glm::vec3 CADERA_DER( 0.10f, -0.05f, 0.0f);
 const glm::vec3 RODILLA   ( 0.00f, -0.45f, 0.0f);
 
-// Índices de los valores de cada Animator
-enum { PUERTA_IZQ = 5, PUERTA_DER = 6 };                                        
-enum { BAJADA_Y = 0, V_TORSO, V_CABEZA, V_HOMBRO, V_CODO, V_MUSLO, V_RODILLA };  // animJeol
+enum { PUERTA_IZQ = 5, PUERTA_DER = 6 };
+enum { BAJADA_Y = 0, V_TORSO, V_CABEZA, V_HOMBRO, V_CODO, V_MUSLO, V_RODILLA };
 
 const float DIST_ALTAR = 2.5f;
 const float DIST_COJIN = 2.0f;
@@ -69,22 +63,21 @@ inline glm::mat4 rotY(const glm::mat4& m, float g) { return glm::rotate(m, glm::
 inline float distanciaPiso(const glm::vec3& a, const glm::vec3& b) {
     return glm::length(glm::vec2(a.x - b.x, a.z - b.z));
 }
-} // namespace z3
+}
 
 class Zona3 {
 public:
-    
-    glm::vec3 origen    = glm::vec3(0.0f);
-    float     rotacionY = 0.0f;   // grados
 
-    // -----------------------------------------------------------------
+    glm::vec3 origen    = glm::vec3(0.0f);
+    float     rotacionY = 0.0f;
+
     void cargar() {
         using namespace z3;
-        // ---------- Modelos (si un archivo no existe, se omite) ----------
+
         mesa      = cargarModelo("z3_jesasang.obj");
         jegi      = cargarModelo("z3_jegi.obj");
         manzana   = cargarModelo("z3_manzana.obj");
-        // Comida de la mesa
+
         pera       = cargarModelo("z3_pera.obj");
         caqui      = cargarModelo("z3_caqui.obj");
         castana    = cargarModelo("z3_castana.obj");
@@ -115,25 +108,21 @@ public:
         piernaIzq    = cargarModelo("z3_doliente_pierna_izq.obj");
         piernaDer    = cargarModelo("z3_doliente_pierna_der.obj");
 
-        // ---------- Texturas de respaldo ----------
-        // Los modelos sin imagen en su .mtl se pintan con estas texturas.
         texMaderaOscura = cargarTextura("madera_oscura.png");
         texMaderaMesa   = cargarTextura("madera_mesa.png");
         texMaderaClara  = cargarTextura("madera_clara.png");
         texLaca         = cargarTextura("laca_roja.png");
         texPapel        = cargarTextura("papel_hanji.png");
-        texTela         = cargarTextura("tela_canamo.png");   // sangbok de cáñamo
-        texCara         = cargarTextura("cara_doliente.png"); // cara, cabello y sujil
-        texEstera       = cargarTextura("estera_paja.png");   // estera dotjari
+        texTela         = cargarTextura("tela_canamo.png");
+        texCara         = cargarTextura("cara_doliente.png");
+        texEstera       = cargarTextura("estera_paja.png");
         texCastana      = cargarTextura("castana.png");
         texAzufaifa     = cargarTextura("azufaifa.png");
         texPescado      = cargarTextura("pescado.png");
         texLaton        = cargarTextura("laton.png");
 
-        // ---------- Animación 1 (KeyFrames): se prepara el altar ----------
-        
         const float P = PLEGADO, A = ABIERTO, D = APERTURA_PUERTAS;
-        //                  bis1 bis2 bis3 bis4 bis5   puertaI   puertaD
+
         animAltar.agregar(  0, { P,   P,   P,   P,   P,   0.0f,     0.0f    });
         animAltar.agregar( 24, { A,   P,   P,   P,   P,   D * 0.2f, D * 0.2f });
         animAltar.agregar( 48, { A,   A,   P,   P,   P,   D * 0.4f, D * 0.4f });
@@ -141,16 +130,13 @@ public:
         animAltar.agregar( 96, { A,   A,   A,   A,   P,   D * 0.8f, D * 0.8f });
         animAltar.agregar(120, { A,   A,   A,   A,   A,   D,        D        });
 
-        // ---------- Animación 2 (KeyFrames): reverencia jeol ----------
-        
-        animJeol.agregar(  0, { 0.00f,   0,    0,     0,    0,   0,    0 });  // erguido
-        animJeol.agregar( 45, { 0.00f,   0,    0,    80,   70,   0,    0 });  // manos a los ojos
-        animJeol.agregar( 90, {-0.45f,   0,    0,    80,   70,   0,   90 });  // arrodillado
-        animJeol.agregar(135, {-0.60f,  85,   10,   150,   20,  70,  160 });  // reverencia completa
-        animJeol.agregar(180, {-0.45f,   0,    0,    80,   70,   0,   90 });  // regresa a rodillas
-        animJeol.agregar(225, { 0.00f,   0,    0,     0,    0,   0,    0 });  // de pie
+        animJeol.agregar(  0, { 0.00f,   0,    0,     0,    0,   0,    0 });
+        animJeol.agregar( 45, { 0.00f,   0,    0,    80,   70,   0,    0 });
+        animJeol.agregar( 90, {-0.45f,   0,    0,    80,   70,   0,   90 });
+        animJeol.agregar(135, {-0.60f,  85,   10,   150,   20,  70,  160 });
+        animJeol.agregar(180, {-0.45f,   0,    0,    80,   70,   0,   90 });
+        animJeol.agregar(225, { 0.00f,   0,    0,     0,    0,   0,    0 });
 
-        // ---------- Hotspots culturales ----------
         hotspots.push_back({ glm::vec3(0.0f, 0.0f, 2.6f), 1.4f,
             "Jesa: el culto a los ancestros",
             "El Jesa es la ceremonia confuciana con la que las familias coreanas honran a sus "
@@ -184,7 +170,6 @@ public:
             "F: ver la reverencia" });
     }
 
-    // -----------------------------------------------------------------
     void actualizar(float deltaTime, const glm::vec3& posCamara) {
         camara = posCamara;
         animAltar.actualizar(deltaTime);
@@ -200,7 +185,6 @@ public:
         if (hotspotCercano != anterior) infoAbierta = false;
     }
 
-    // -----------------------------------------------------------------
     void tecla(int key) {
         using namespace z3;
         if (key == GLFW_KEY_I && hotspotCercano >= 0)
@@ -212,10 +196,9 @@ public:
             animJeol.reproducir();
     }
 
-    // -----------------------------------------------------------------
     void dibujar(Shader& shader, GLint modelLoc) {
         using namespace z3;
-        // Manda la matriz, activa la textura de respaldo y dibuja.
+
         auto pintar = [&](const ModeloPtr& m, const glm::mat4& matriz, GLuint tex) {
             if (!m) return;
             glActiveTexture(GL_TEXTURE0);
@@ -227,12 +210,8 @@ public:
         glm::mat4 base = glm::translate(glm::mat4(1.0f), origen);
         base = rotY(base, rotacionY);
 
-        // ---------- 1. Mesa ----------
         pintar(mesa, base, texMaderaMesa);
 
-        // ---------- 2. Fila del frente: frutas en pedestales ----------
-        // Jo-yul-i-si, de oeste a este (izquierda a derecha del visitante):
-        // azufaifas, castañas, peras, caquis y manzanas (rojas al este).
         for (int i = 0; i < NUM_JEGI; i++) {
             glm::mat4 mJegi = glm::translate(base, glm::vec3(JEGI_X[i], ALTURA_MESA, JEGI_Z));
             pintar(jegi, glm::scale(mJegi, glm::vec3(0.8f)), texLaca);
@@ -246,8 +225,6 @@ public:
             }
         }
 
-        // ---------- 2b. Fila media: pescado al este, tteok al oeste ----------
-        // Eodong-yukseo y Dudong-mihseo: pescado al este, con la cabeza hacia el este.
         glm::mat4 mPlatoLargo = glm::translate(base, glm::vec3(0.30f, ALTURA_MESA, -0.02f));
         pintar(platoLargo, mPlatoLargo, texLaca);
         pintar(pescado, glm::translate(mPlatoLargo, glm::vec3(0.0f, 0.06f, 0.0f)), texPescado);
@@ -255,23 +232,18 @@ public:
         pintar(jegi, glm::scale(mTteok, glm::vec3(0.8f)), texLaca);
         pintar(tteok, glm::translate(mTteok, glm::vec3(0.0f, ALTURA_PLATO_JEGI, 0.0f)), texTteok);
 
-        // ---------- 2c. Fila de atrás: arroz al oeste, sopa al este, copa al centro ----------
-        // Banseo-gaengdong: arroz al oeste y sopa al este.
         pintar(tazonArroz, glm::translate(base, glm::vec3(-0.24f, ALTURA_MESA, -0.24f)), texTazon);
         pintar(tazonSopa,  glm::translate(base, glm::vec3( 0.24f, ALTURA_MESA, -0.24f)), texTazon);
         pintar(copa,       glm::translate(base, glm::vec3( 0.00f, ALTURA_MESA, -0.05f)), texLaton);
 
-        // ---------- 3. Incensario al frente (si existe) ----------
         pintar(incensario, glm::translate(base, glm::vec3(0.0f, ALTURA_MESA, 0.28f)), texMaderaOscura);
 
-        // ---------- 4. Cofre: jerarquía cofre -> puertas ----------
         glm::mat4 mCofre = glm::translate(base, POS_COFRE);
         pintar(cofre, mCofre, texMaderaOscura);
         pintar(tableta, mCofre, texMaderaClara);
         pintar(puertaIzq, rotY(glm::translate(mCofre, BISAGRA_IZQ), -animAltar.valor(PUERTA_IZQ)), texMaderaOscura);
         pintar(puertaDer, rotY(glm::translate(mCofre, BISAGRA_DER),  animAltar.valor(PUERTA_DER)), texMaderaOscura);
 
-        // ---------- 5. Biombo: cada panel es HIJO del anterior ----------
         glm::mat4 mPanel = glm::translate(base, POS_BIOMBO);
         pintar(panel, mPanel, texPapel);
         for (int i = 1; i < NUM_PANELES; i++) {
@@ -282,7 +254,7 @@ public:
         }
         glm::mat4 mCadera = glm::translate(base,
             POS_DOLIENTE + glm::vec3(0.0f, ALTURA_CADERA + animJeol.valor(BAJADA_Y), 0.0f));
-        mCadera = rotY(mCadera, 180.0f);   // que mire hacia el altar
+        mCadera = rotY(mCadera, 180.0f);
         pintar(cadera, mCadera, texTela);
 
         glm::mat4 mTorso = rotX(glm::translate(mCadera, CINTURA), animJeol.valor(V_TORSO));
@@ -303,14 +275,12 @@ public:
         pintar(musloDer, mMD, texTela);
         pintar(piernaDer, rotX(glm::translate(mMD, RODILLA), animJeol.valor(V_RODILLA)), texTela);
 
-        // Estera de paja delgada (2.5 cm) y más larga que el cojín original
         pintar(cojin, glm::scale(glm::translate(base, POS_DOLIENTE + glm::vec3(0.0f, 0.0f, -0.10f)),
                                  glm::vec3(1.5f, 0.3f, 2.2f)), texEstera);
 
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    // -----------------------------------------------------------------
     void dibujarUI() {
         if (hotspotCercano < 0) return;
         const Hotspot& h = hotspots[hotspotCercano];
@@ -359,8 +329,6 @@ private:
     bool infoAbierta = false;
     glm::vec3 camara = glm::vec3(0.0f);
 
-    // Pirámide de 4 frutas: 3 abajo y 1 arriba.
-    //   d = ancho de la fruta, alto = cuánto sube la de arriba, esc = escala del modelo
     template <typename F>
     void dibujarPiramide(F& pintar, const glm::mat4& mPlato, const ModeloPtr& fruta,
                          GLuint tex, float d, float alto, float esc) {
@@ -373,12 +341,11 @@ private:
             glm::vec3( 0.0f,       0.0f,  r),
             glm::vec3( 0.0f,       alto,  0.0f) };
         for (int k = 0; k < 4; k++) {
-            glm::mat4 m = rotY(glm::translate(mPlato, pos[k]), 70.0f * k);   // que no se vean idénticas
+            glm::mat4 m = rotY(glm::translate(mPlato, pos[k]), 70.0f * k);
             pintar(fruta, glm::scale(m, glm::vec3(esc)), tex);
         }
     }
 
-    
     template <typename F>
     void dibujarMonton(F& pintar, const glm::mat4& mPlato, const ModeloPtr& fruto,
                        GLuint tex, float d, float alto) {
@@ -415,6 +382,6 @@ private:
             std::cout << "[Zona3] Falta la textura " << archivo << "\n";
             return 0;
         }
-        return (GLuint)TextureFromFile(archivo.c_str(), dir);   // función de Model.h
+        return (GLuint)TextureFromFile(archivo.c_str(), dir);
     }
 };

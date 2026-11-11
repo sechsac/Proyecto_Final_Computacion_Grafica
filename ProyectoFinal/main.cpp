@@ -1,9 +1,3 @@
-// =====================================================================
-//  Proyecto Final - Computación Gráfica e IHC (Equipo 10)
-//  Recorrido virtual: ritual funerario coreano en un Hanok
-//  Controles: W A S D = moverse | ratón = mirar | I = información
-//             E = preparar altar | F = reverencia | Esc = salir
-// =====================================================================
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -20,46 +14,36 @@
 #include "Camera.h"
 #include "Model.h"
 
-// Interfaz (paneles de información)
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-// Zonas del recorrido
 #include "Zona3.h"
 #include "Zona2.h"
-// #include "Zona1.h"   // Isabel
 
-// Prototipos
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 
-// Ventana
 const GLuint WIDTH = 1280, HEIGHT = 720;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
-// Cámara en primera persona (ojos a 1.6 m), frente al altar
 Camera  camera(glm::vec3(0.0f, 1.6f, 3.5f));
 GLfloat lastX = WIDTH / 2.0f;
 GLfloat lastY = HEIGHT / 2.0f;
 bool keys[1024];
 bool firstMouse = true;
 
-// Tiempo
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
-// Zonas
 Zona3 zona3;
 Zona2 zona2;
 
-// Luz puntual cálida sobre el altar (velas). Persona B: ajustar aquí.
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f, 1.3f, 0.2f)
 };
 
-// Cubo simple (posición + normal) para el piso provisional
 float vertices[] = {
 	-0.5f,-0.5f,-0.5f, 0,0,-1,  0.5f,-0.5f,-0.5f, 0,0,-1,  0.5f, 0.5f,-0.5f, 0,0,-1,
 	 0.5f, 0.5f,-0.5f, 0,0,-1, -0.5f, 0.5f,-0.5f, 0,0,-1, -0.5f,-0.5f,-0.5f, 0,0,-1,
@@ -90,7 +74,7 @@ int main()
 
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, MouseCallback);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);   // ratón para mirar
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glewExperimental = GL_TRUE;
 	if (GLEW_OK != glewInit())
@@ -100,12 +84,11 @@ int main()
 	}
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	// ---------- ImGui (después de registrar los callbacks) ----------
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.IniFilename = nullptr;
-	// Fuente de Windows con acentos y ñ; si no existe, usa la de ImGui.
+
 	const char* fuente = "C:\\Windows\\Fonts\\segoeui.ttf";
 	if (std::ifstream(fuente).good()) io.Fonts->AddFontFromFileTTF(fuente, 22.0f);
 	else                              io.Fonts->AddFontDefault();
@@ -113,16 +96,12 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	// ---------- Shaders ----------
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 
-	// ---------- Modelos de las zonas ----------
-	// Model hanok((char*)"Models/hanok.glb");   // Persona A: estructura del Hanok
 	zona3.cargar();
 	zona2.cargar();
-	zona3.origen = glm::vec3(0.0f, 0.0f, 0.0f);   // ajustar cuando el Hanok esté colocado
+	zona3.origen = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	// Piso provisional (se quita cuando cargue el Hanok)
 	GLuint texPiso = (GLuint)TextureFromFile("piso_maru.png", "Models/z3");
 
 	GLuint VBO, VAO;
@@ -140,7 +119,6 @@ int main()
 	glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()),
 		(GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.05f, 200.0f);
 
-	// ---------- Loop principal ----------
 	while (!glfwWindowShouldClose(window))
 	{
 		GLfloat currentFrame = (GLfloat)glfwGetTime();
@@ -152,7 +130,7 @@ int main()
 		zona3.actualizar(deltaTime, camera.GetPosition());
 		zona2.actualizar(deltaTime, camera.GetPosition());
 
-		glClearColor(0.05f, 0.06f, 0.10f, 1.0f);   // noche
+		glClearColor(0.05f, 0.06f, 0.10f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
@@ -163,13 +141,11 @@ int main()
 		glm::vec3 camPos = camera.GetPosition();
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "viewPos"), camPos.x, camPos.y, camPos.z);
 
-		// Luz direccional: luz de luna, fría y suave
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.3f, -1.0f, -0.4f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.30f, 0.30f, 0.34f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.45f, 0.45f, 0.52f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.10f, 0.10f, 0.10f);
 
-		// Luz puntual: velas del altar, cálida
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"),
 			pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.10f, 0.07f, 0.03f);
@@ -179,7 +155,6 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.35f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.44f);
 
-		// Spotlight apagada (el shader la espera)
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.position"), camPos.x, camPos.y, camPos.z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.direction"), camera.GetFront().x, camera.GetFront().y, camera.GetFront().z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.ambient"), 0.0f, 0.0f, 0.0f);
@@ -198,7 +173,6 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		// ---------- Piso provisional ----------
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.05f, 0.0f));
 		model = glm::scale(model, glm::vec3(20.0f, 0.1f, 20.0f));
@@ -209,12 +183,9 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-		// ---------- Zonas ----------
-		// zona1.dibujar(lightingShader, modelLoc);
 		zona2.dibujar(lightingShader, modelLoc);
 		zona3.dibujar(lightingShader, modelLoc);
 
-		// ---------- Interfaz ----------
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -239,7 +210,6 @@ int main()
 	return 0;
 }
 
-// Movimiento de la cámara
 void DoMovement()
 {
 	if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])    camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -262,7 +232,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	if (action == GLFW_PRESS)
 	{
 		zona3.tecla(key);
-		// zona1.tecla(key);
+
 		zona2.tecla(key);
 	}
 }
