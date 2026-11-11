@@ -1,18 +1,6 @@
 #pragma once
-// =====================================================================
 //  Zona3.h  -  Sala principal: altar del Jesa
-// ---------------------------------------------------------------------
-//  Todo lo de la zona 3 vive aquí. main.cpp solo llama a:
-//      zona3.cargar();                          (una vez, antes del loop)
-//      zona3.actualizar(deltaTime, camPos);     (cada frame)
-//      zona3.dibujar(lightingShader, modelLoc); (cada frame)
-//      zona3.dibujarUI();                       (entre NewFrame y Render de ImGui)
-//      zona3.tecla(key);                        (en KeyCallback, al presionar)
-//
-//  IMPORTANTE: este archivo es "header-only" (todo el código está aquí)
-//  y SOLO debe incluirse en main.cpp. Model.h define una función global
-//  (TextureFromFile) que daría error de enlace si se incluyera en dos .cpp.
-// =====================================================================
+
 #include <memory>
 #include <vector>
 #include <string>
@@ -31,11 +19,7 @@
 #include "imgui/imgui.h"
 
 namespace z3 {
-// =====================================================================
-//  MEDIDAS (en metros). Ejes de OpenGL: X derecha, Y arriba, Z hacia
-//  el visitante. El altar está en el origen de la zona y "mira" hacia +Z.
-//  (Al exportar de Blender con Forward -Z / Up Y: Blender Y = OpenGL -Z)
-// =====================================================================
+
 const std::string RUTA = "Models/z3/";
 
 const float ALTURA_MESA = 0.70f;                 // superficie de la jesasang
@@ -45,12 +29,11 @@ const float JEGI_Z = 0.15f;
 const float JEGI_X[] = { -0.40f, -0.20f, 0.0f, 0.20f, 0.40f };
 const int   NUM_JEGI = 5;
 const float ALTURA_PLATO_JEGI = 0.084f;          // fondo del plato (pedestal escalado a 0.8)
-const float ESCALA_MANZANA = 0.7f;               // el .obj quedó de 12 cm; 0.7 -> 8.5 cm
-                                                 // (si la vuelves a exportar a 8.5 cm, pon 1.0f)
+const float ESCALA_MANZANA = 0.7f;               
 
 // --- Cofre (sinjujip), sobre la mesa, al centro y hacia atrás ---
 const glm::vec3 POS_COFRE(0.0f, ALTURA_MESA, -0.25f);
-const glm::vec3 BISAGRA_IZQ(-0.08f, 0.0f, 0.06f);   // relativo al cofre
+const glm::vec3 BISAGRA_IZQ(-0.08f, 0.0f, 0.06f);   
 const glm::vec3 BISAGRA_DER( 0.08f, 0.0f, 0.06f);
 const float APERTURA_PUERTAS = 110.0f;
 
@@ -59,12 +42,12 @@ const glm::vec3 POS_BIOMBO(-1.20f, 0.0f, -0.90f);
 const float ANCHO_PANEL = 0.45f;
 const int   NUM_PANELES = 6;
 const float PLEGADO = 175.0f;                    // bisagra cerrada (acordeón)
-const float ABIERTO = 30.0f;                     // bisagra abierta (zigzag)
+const float ABIERTO = 30.0f;                     
 
 // --- Doliente: posición de los pies, frente a la mesa ---
 const glm::vec3 POS_DOLIENTE(0.0f, 0.0f, 1.10f);
 const float     ALTURA_CADERA = 0.95f;
-// Articulaciones: posición de cada pieza RESPECTO A SU PADRE (se miden en Blender)
+// Articulaciones
 const glm::vec3 CINTURA   ( 0.00f,  0.10f, 0.0f);
 const glm::vec3 CUELLO    ( 0.00f,  0.50f, 0.0f);
 const glm::vec3 HOMBRO_IZQ(-0.20f,  0.45f, 0.0f);
@@ -75,7 +58,7 @@ const glm::vec3 CADERA_DER( 0.10f, -0.05f, 0.0f);
 const glm::vec3 RODILLA   ( 0.00f, -0.45f, 0.0f);
 
 // Índices de los valores de cada Animator
-enum { PUERTA_IZQ = 5, PUERTA_DER = 6 };                                        // animAltar
+enum { PUERTA_IZQ = 5, PUERTA_DER = 6 };                                        
 enum { BAJADA_Y = 0, V_TORSO, V_CABEZA, V_HOMBRO, V_CODO, V_MUSLO, V_RODILLA };  // animJeol
 
 const float DIST_ALTAR = 2.5f;
@@ -90,8 +73,7 @@ inline float distanciaPiso(const glm::vec3& a, const glm::vec3& b) {
 
 class Zona3 {
 public:
-    // Dónde está la zona 3 dentro del Hanok y hacia dónde mira (lo define
-    // quien coloque el Hanok; mientras tanto, el altar queda en el origen).
+    
     glm::vec3 origen    = glm::vec3(0.0f);
     float     rotacionY = 0.0f;   // grados
 
@@ -149,8 +131,7 @@ public:
         texLaton        = cargarTextura("laton.png");
 
         // ---------- Animación 1 (KeyFrames): se prepara el altar ----------
-        // El biombo se despliega panel por panel y las puertas del cofre
-        // se abren poco a poco, revelando la tableta del ancestro.
+        
         const float P = PLEGADO, A = ABIERTO, D = APERTURA_PUERTAS;
         //                  bis1 bis2 bis3 bis4 bis5   puertaI   puertaD
         animAltar.agregar(  0, { P,   P,   P,   P,   P,   0.0f,     0.0f    });
@@ -161,7 +142,7 @@ public:
         animAltar.agregar(120, { A,   A,   A,   A,   A,   D,        D        });
 
         // ---------- Animación 2 (KeyFrames): reverencia jeol ----------
-        //                 bajadaY  torso cabeza hombro codo muslo rodilla
+        
         animJeol.agregar(  0, { 0.00f,   0,    0,     0,    0,   0,    0 });  // erguido
         animJeol.agregar( 45, { 0.00f,   0,    0,    80,   70,   0,    0 });  // manos a los ojos
         animJeol.agregar( 90, {-0.45f,   0,    0,    80,   70,   0,   90 });  // arrodillado
@@ -299,14 +280,6 @@ public:
             mPanel = rotY(mPanel, signo * animAltar.valor(i - 1));
             pintar(panel, mPanel, texPapel);
         }
-
-        // ---------- 6. Doliente: modelo jerárquico ----------
-        //  cadera -> torso -> cabeza
-        //                  -> brazo -> antebrazo  (x2)
-        //  cadera -> muslo -> pierna              (x2)
-        // Se asume que en Blender el personaje mira al frente (-Y), como es lo normal;
-        // el giro de 180° lo voltea hacia el altar. Si una parte se dobla al revés,
-        // cambia el signo de su ángulo.
         glm::mat4 mCadera = glm::translate(base,
             POS_DOLIENTE + glm::vec3(0.0f, ALTURA_CADERA + animJeol.valor(BAJADA_Y), 0.0f));
         mCadera = rotY(mCadera, 180.0f);   // que mire hacia el altar
@@ -405,8 +378,7 @@ private:
         }
     }
 
-    // Montón de frutos pequeños (azufaifas, castañas): 7 + 3 + 1.
-    //   d = separación entre frutos, alto = altura de cada capa
+    
     template <typename F>
     void dibujarMonton(F& pintar, const glm::mat4& mPlato, const ModeloPtr& fruto,
                        GLuint tex, float d, float alto) {

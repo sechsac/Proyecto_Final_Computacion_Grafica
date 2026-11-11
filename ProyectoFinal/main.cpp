@@ -27,8 +27,8 @@
 
 // Zonas del recorrido
 #include "Zona3.h"
-// #include "Zona1.h"   // Persona A
-// #include "Zona2.h"   // Persona B
+#include "Zona2.h"
+// #include "Zona1.h"   // Isabel
 
 // Prototipos
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -52,6 +52,7 @@ GLfloat lastFrame = 0.0f;
 
 // Zonas
 Zona3 zona3;
+Zona2 zona2;
 
 // Luz puntual cálida sobre el altar (velas). Persona B: ajustar aquí.
 glm::vec3 pointLightPositions[] = {
@@ -118,6 +119,7 @@ int main()
 	// ---------- Modelos de las zonas ----------
 	// Model hanok((char*)"Models/hanok.glb");   // Persona A: estructura del Hanok
 	zona3.cargar();
+	zona2.cargar();
 	zona3.origen = glm::vec3(0.0f, 0.0f, 0.0f);   // ajustar cuando el Hanok esté colocado
 
 	// Piso provisional (se quita cuando cargue el Hanok)
@@ -148,6 +150,7 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 		zona3.actualizar(deltaTime, camera.GetPosition());
+		zona2.actualizar(deltaTime, camera.GetPosition());
 
 		glClearColor(0.05f, 0.06f, 0.10f, 1.0f);   // noche
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -208,7 +211,7 @@ int main()
 
 		// ---------- Zonas ----------
 		// zona1.dibujar(lightingShader, modelLoc);
-		// zona2.dibujar(lightingShader, modelLoc);
+		zona2.dibujar(lightingShader, modelLoc);
 		zona3.dibujar(lightingShader, modelLoc);
 
 		// ---------- Interfaz ----------
@@ -216,6 +219,7 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		zona3.dibujarUI();
+		zona2.dibujarUI();
 		ImGui::SetNextWindowPos(ImVec2(12, 12));
 		ImGui::SetNextWindowBgAlpha(0.45f);
 		ImGui::Begin("##ayuda", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
@@ -259,7 +263,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	{
 		zona3.tecla(key);
 		// zona1.tecla(key);
-		// zona2.tecla(key);
+		zona2.tecla(key);
 	}
 }
 
