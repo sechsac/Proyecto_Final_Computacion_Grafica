@@ -1,0 +1,12 @@
+newmtl pavimento
+Kd 1 1 1
+map_Kd arq_pavimento.png
+
+newmtl madera
+Kd 1 1 1
+map_Kd arq_madera.png
+
+newmtl piedra
+Kd 1 1 1
+map_Kd arq_piedra.png
+

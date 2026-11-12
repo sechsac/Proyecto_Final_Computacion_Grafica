@@ -1,0 +1,7 @@
+newmtl z1_mesa_altar_m0
+Kd 1 1 1
+map_Kd z1_mesa_altar_m0.png
+
+newmtl z1_mesa_altar_m1
+Kd 1 1 1
+map_Kd z1_mesa_altar_m1.png

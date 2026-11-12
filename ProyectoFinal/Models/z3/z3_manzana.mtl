@@ -1,0 +1,22 @@
+# Blender 5.2.2 LTS MTL File: 'Apple.blend'
+# www.blender.org
+
+newmtl M_Apple
+Ns 140.419128
+Ka 1.000000 1.000000 1.000000
+Ks 0.855738 0.855738 0.855738
+Ke 0.000000 0.000000 0.000000
+Ni 2.050001
+d 1.000000
+illum 3
+map_Kd T_Apple.png
+
+newmtl M_Stem
+Ns 3.841950
+Ka 1.000000 1.000000 1.000000
+Ks 0.318182 0.318182 0.318182
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd T_Stem.png
