@@ -14,6 +14,7 @@
 #include "Model.h"
 #include "Animator.h"
 #include "Hotspot.h"
+#include "Farol.h"
 #include "imgui/imgui.h"
 
 namespace z2 {
@@ -44,7 +45,7 @@ const float LARGO_SEGMENTO = 0.22f;
 
 enum { BAJADA_Y = 0, V_TORSO, V_HOMBRO, V_CODO, V_MUSLO, V_RODILLA, V_TELA };
 
-const float DIST_RITUAL = 3.0f;
+const float DIST_RITUAL = 4.5f;
 
 inline glm::mat4 rotX(const glm::mat4& m, float g) { return glm::rotate(m, glm::radians(g), glm::vec3(1, 0, 0)); }
 inline glm::mat4 rotY(const glm::mat4& m, float g) { return glm::rotate(m, glm::radians(g), glm::vec3(0, 1, 0)); }
@@ -56,6 +57,7 @@ inline float distanciaPiso(const glm::vec3& a, const glm::vec3& b) {
 class Zona2 {
 public:
     glm::vec3 origen    = glm::vec3(6.0f, 0.0f, 0.0f);
+    Farol     farol;
     float     rotacionY = 0.0f;
 
     void cargar() {
@@ -83,6 +85,8 @@ public:
 
         texTraje = cargarTextura(RUTA, "z2_traje_mudang.png");
         texCara  = cargarTextura(RUTA, "z2_cara_mudang.png");
+        farol.posicion = glm::vec3(1.4f, 0.0f, 0.6f);
+        farol.cargar();
 
         animGilkkut.agregar(  0, { 0.00f,  5,   20,   40,   0,    0,           0,   0,   0,   0, -70, -20,   0,   0 });
         animGilkkut.agregar( 45, { 0.00f,  0,  165,    0,   0,    0,           0,   0,   0,   0,   0,   0,   0,   0 });
@@ -120,6 +124,7 @@ public:
     void actualizar(float deltaTime, const glm::vec3& posCamara) {
         camara = posCamara;
         animGilkkut.actualizar(deltaTime);
+        farol.actualizar(deltaTime, posCamara, z2::rotY(glm::translate(glm::mat4(1.0f), origen), rotacionY));
         int anterior = hotspotCercano;
         hotspotCercano = -1;
         float mejor = 1e9f;
@@ -194,6 +199,7 @@ public:
             pintar(nobi, mSeg, 0);
             mSeg = glm::translate(mSeg, glm::vec3(0.0f, -LARGO_SEGMENTO, 0.0f));
         }
+        farol.dibujar(shader, modelLoc, base);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 

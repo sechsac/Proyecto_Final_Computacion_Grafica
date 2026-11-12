@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <string>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -20,6 +21,7 @@
 
 #include "Zona3.h"
 #include "Zona2.h"
+#include "Zona1.h"
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -39,6 +41,7 @@ GLfloat lastFrame = 0.0f;
 
 Zona3 zona3;
 Zona2 zona2;
+Zona1 zona1;
 
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f, 1.3f, 0.2f)
@@ -100,6 +103,7 @@ int main()
 
 	zona3.cargar();
 	zona2.cargar();
+	zona1.cargar();
 	zona3.origen = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	GLuint texPiso = (GLuint)TextureFromFile("piso_maru.png", "Models/z3");
@@ -129,6 +133,7 @@ int main()
 		DoMovement();
 		zona3.actualizar(deltaTime, camera.GetPosition());
 		zona2.actualizar(deltaTime, camera.GetPosition());
+		zona1.actualizar(deltaTime, camera.GetPosition());
 
 		glClearColor(0.05f, 0.06f, 0.10f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -154,6 +159,20 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.35f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.44f);
+
+		Farol* faroles[2] = { &zona1.farol, &zona2.farol };
+		for (int i = 0; i < 2; i++) {
+			std::string luz = "pointLights[" + std::to_string(i + 1) + "].";
+			glm::vec3 p = faroles[i]->posLuz();
+			float k = faroles[i]->intensidad();
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (luz + "position").c_str()), p.x, p.y, p.z);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (luz + "ambient").c_str()), 0.04f * k, 0.02f * k, 0.01f * k);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (luz + "diffuse").c_str()), 1.00f * k, 0.55f * k, 0.30f * k);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (luz + "specular").c_str()), 0.30f * k, 0.20f * k, 0.10f * k);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (luz + "constant").c_str()), 1.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (luz + "linear").c_str()), 0.7f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (luz + "quadratic").c_str()), 1.8f);
+		}
 
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.position"), camPos.x, camPos.y, camPos.z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.direction"), camera.GetFront().x, camera.GetFront().y, camera.GetFront().z);
@@ -185,12 +204,14 @@ int main()
 
 		zona2.dibujar(lightingShader, modelLoc);
 		zona3.dibujar(lightingShader, modelLoc);
+		zona1.dibujar(lightingShader, modelLoc);
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		zona3.dibujarUI();
 		zona2.dibujarUI();
+		zona1.dibujarUI();
 		ImGui::SetNextWindowPos(ImVec2(12, 12));
 		ImGui::SetNextWindowBgAlpha(0.45f);
 		ImGui::Begin("##ayuda", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
@@ -234,6 +255,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		zona3.tecla(key);
 
 		zona2.tecla(key);
+		zona1.tecla(key);
 	}
 }
 

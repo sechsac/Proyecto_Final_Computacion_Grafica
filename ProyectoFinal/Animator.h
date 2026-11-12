@@ -38,6 +38,7 @@ public:
     }
 
     bool reproduciendo() const { return activo; }
+    float frame() const { return actual; }
 
     void actualizar(float deltaTime) {
         if (!activo) return;
