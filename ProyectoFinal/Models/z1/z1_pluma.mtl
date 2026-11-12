@@ -1,0 +1,11 @@
+newmtl z1_pluma_m0
+Kd 1 1 1
+map_Kd z1_pluma_m0.png
+
+newmtl z1_pluma_m1
+Kd 1 1 1
+map_Kd z1_pluma_m1.png
+
+newmtl z1_pluma_m2
+Kd 1 1 1
+map_Kd z1_pluma_m2.png

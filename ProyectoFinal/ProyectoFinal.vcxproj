@@ -163,6 +163,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Animator.h" />
     <ClInclude Include="Hotspot.h" />
+    <ClInclude Include="Zona1.h" />
     <ClInclude Include="Zona2.h" />
     <ClInclude Include="Zona3.h" />
     <ClInclude Include="Model.h" />

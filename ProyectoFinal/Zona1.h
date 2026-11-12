@@ -24,7 +24,7 @@ const float     ALTURA_MESA_ENTRADA = 0.75f;
 const float     ALTURA_MESA_ALTAR   = 0.80f;
 const glm::vec3 POS_MESA_ENTRADA(0.0f, 0.0f, 0.0f);
 const glm::vec3 POS_LIBRO(-0.20f, ALTURA_MESA_ENTRADA, 0.08f);
-const glm::vec3 POS_PLUMA(-0.42f, ALTURA_MESA_ENTRADA, 0.10f);
+const glm::vec3 POS_PLUMA(-0.36f, ALTURA_MESA_ENTRADA, 0.10f);
 const glm::vec3 POS_PLATO(0.09f, ALTURA_MESA_ENTRADA, 0.07f);
 const glm::vec3 POS_VISITANTE(0.0f, 0.0f, 0.55f);
 
@@ -35,11 +35,11 @@ const glm::vec3 POS_VELA[]       = { glm::vec3(-0.58f, ALTURA_MESA_ALTAR, -1.95f
 const glm::vec3 POS_VASIJA(0.0f, ALTURA_MESA_ALTAR, -1.85f);
 const glm::vec3 POS_VASO_INCIENSO(0.20f, ALTURA_MESA_ALTAR, -1.85f);
 const glm::vec3 POS_INCIENSO(-0.20f, ALTURA_MESA_ALTAR, -1.85f);
-const glm::vec3 POS_BOUQUET[] = { glm::vec3(-0.95f, 0.0f, -2.0f), glm::vec3(0.95f, 0.0f, -2.0f) };
-const glm::vec3 POS_TAPETE(0.0f, 0.0f, -1.30f);
+const glm::vec3 POS_BOUQUET[] = { glm::vec3(-1.15f, 0.0f, -2.0f), glm::vec3(1.15f, 0.0f, -2.0f) };
+const glm::vec3 POS_TAPETE(0.0f, 0.0f, -1.05f);
 const glm::vec3 POS_CEREZO(-3.40f, 0.0f, 3.40f);
-const glm::vec3 POS_LINTERNA(1.90f, 0.0f, -2.20f);
-const glm::vec3 POS_FAROL(1.20f, 0.0f, -0.60f);
+const glm::vec3 POS_LINTERNA(1.90f, 1.80f, -2.35f);
+const glm::vec3 POS_FAROL(2.00f, 0.0f, 1.20f);
 
 const float     ALTURA_CADERA = 0.95f;
 const glm::vec3 CINTURA   ( 0.00f,  0.10f, 0.0f);
@@ -180,7 +180,7 @@ public:
         glm::mat4 b = base();
         auto en = [&](const glm::vec3& p) { return glm::translate(b, p); };
 
-        pintar(mesaEntrada, en(POS_MESA_ENTRADA), texMadera);
+        pintar(mesaEntrada, glm::scale(en(POS_MESA_ENTRADA), glm::vec3(0.8f, 1.0f, 0.8f)), texMadera);
         pintar(libro, en(POS_LIBRO), texClaro);
         pintar(pluma, en(POS_PLUMA), texMadera);
         pintar(plato, en(POS_PLATO), 0);

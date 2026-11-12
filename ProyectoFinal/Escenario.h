@@ -17,7 +17,7 @@ public:
         for (const char* nombre : { "arq_casa.obj", "arq_patio.obj", "arq_muro.obj", "arq_porton.obj", "arq_jardin.obj" })
             agregar(RUTA_ARQ + nombre, { colocar(glm::vec3(0.0f), 0.0f, 1.0f) });
 
-        agregar(RUTA_ENT + "pagoda.obj",          { colocar(glm::vec3( 6.5f, 0.55f, -6.5f), 0.0f, 1.0f) });
+        agregar(RUTA_ENT + "pagoda.obj",          { colocar(glm::vec3( 6.5f, 0.0f, -6.4f), 0.0f, 1.0f) });
         agregar(RUTA_ENT + "pino.obj",            { colocar(glm::vec3( 4.3f, 0.0f, -7.8f),   0.0f, 1.0f),
                                                     colocar(glm::vec3( 8.9f, 0.0f, -5.0f),  70.0f, 0.85f),
                                                     colocar(glm::vec3(-9.4f, 0.0f, -7.5f), 140.0f, 1.1f),
