@@ -22,6 +22,8 @@
 #include "Zona3.h"
 #include "Zona2.h"
 #include "Zona1.h"
+#include "Skybox.h"
+#include "Escenario.h"
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -42,6 +44,8 @@ GLfloat lastFrame = 0.0f;
 Zona3 zona3;
 Zona2 zona2;
 Zona1 zona1;
+Skybox cielo;
+Escenario escenario;
 
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f, 1.3f, 0.2f)
@@ -100,10 +104,13 @@ int main()
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
+	Shader skyboxShader("Shader/skybox.vs", "Shader/skybox.frag");
+	cielo.cargar("Models/skybox");
 
 	zona3.cargar();
 	zona2.cargar();
 	zona1.cargar();
+	escenario.cargar();
 	zona3.origen = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	GLuint texPiso = (GLuint)TextureFromFile("piso_maru.png", "Models/z3");
@@ -130,6 +137,12 @@ int main()
 		lastFrame = currentFrame;
 
 		glfwPollEvents();
+		glfwGetFramebufferSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
+		if (SCREEN_WIDTH > 0 && SCREEN_HEIGHT > 0) {
+			glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+			projection = glm::perspective(glm::radians(camera.GetZoom()),
+				(GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.05f, 200.0f);
+		}
 		DoMovement();
 		zona3.actualizar(deltaTime, camera.GetPosition());
 		zona2.actualizar(deltaTime, camera.GetPosition());
@@ -146,9 +159,9 @@ int main()
 		glm::vec3 camPos = camera.GetPosition();
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "viewPos"), camPos.x, camPos.y, camPos.z);
 
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.3f, -1.0f, -0.4f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.30f, 0.30f, 0.34f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.45f, 0.45f, 0.52f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), 0.85f, -0.45f, 0.30f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.32f, 0.27f, 0.30f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.80f, 0.50f, 0.32f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.10f, 0.10f, 0.10f);
 
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"),
@@ -194,7 +207,7 @@ int main()
 
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.05f, 0.0f));
-		model = glm::scale(model, glm::vec3(20.0f, 0.1f, 20.0f));
+		model = glm::scale(model, glm::vec3(60.0f, 0.1f, 60.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texPiso);
@@ -202,9 +215,12 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
+		escenario.dibujar(lightingShader, modelLoc);
 		zona2.dibujar(lightingShader, modelLoc);
 		zona3.dibujar(lightingShader, modelLoc);
 		zona1.dibujar(lightingShader, modelLoc);
+
+		cielo.dibujar(skyboxShader, view, projection);
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();

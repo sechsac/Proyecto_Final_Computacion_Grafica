@@ -1,0 +1,24 @@
+newmtl piedra
+Kd 1 1 1
+map_Kd arq_piedra.png
+
+newmtl columna
+Kd 1 1 1
+map_Kd arq_columna.png
+
+newmtl viga
+Kd 1 1 1
+map_Kd arq_viga.png
+
+newmtl hanji
+Kd 1 1 1
+map_Kd arq_hanji.png
+
+newmtl teja
+Kd 1 1 1
+map_Kd arq_teja.png
+
+newmtl madera
+Kd 1 1 1
+map_Kd arq_madera.png
+

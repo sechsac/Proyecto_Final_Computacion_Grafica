@@ -1,0 +1,8 @@
+newmtl muro
+Kd 1 1 1
+map_Kd arq_muro.png
+
+newmtl teja
+Kd 1 1 1
+map_Kd arq_teja.png
+

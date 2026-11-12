@@ -37,7 +37,7 @@ const glm::vec3 POS_VASO_INCIENSO(0.20f, ALTURA_MESA_ALTAR, -1.85f);
 const glm::vec3 POS_INCIENSO(-0.20f, ALTURA_MESA_ALTAR, -1.85f);
 const glm::vec3 POS_BOUQUET[] = { glm::vec3(-0.95f, 0.0f, -2.0f), glm::vec3(0.95f, 0.0f, -2.0f) };
 const glm::vec3 POS_TAPETE(0.0f, 0.0f, -1.30f);
-const glm::vec3 POS_CEREZO(-2.40f, 0.0f, -1.20f);
+const glm::vec3 POS_CEREZO(-3.40f, 0.0f, 3.40f);
 const glm::vec3 POS_LINTERNA(1.90f, 0.0f, -2.20f);
 const glm::vec3 POS_FAROL(1.20f, 0.0f, -0.60f);
 
