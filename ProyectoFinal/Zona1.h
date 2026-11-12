@@ -37,7 +37,7 @@ const glm::vec3 POS_VASO_INCIENSO(0.20f, ALTURA_MESA_ALTAR, -1.85f);
 const glm::vec3 POS_INCIENSO(-0.20f, ALTURA_MESA_ALTAR, -1.85f);
 const glm::vec3 POS_BOUQUET[] = { glm::vec3(-1.15f, 0.0f, -2.0f), glm::vec3(1.15f, 0.0f, -2.0f) };
 const glm::vec3 POS_TAPETE(0.0f, 0.0f, -1.05f);
-const glm::vec3 POS_CEREZO(-3.40f, 0.0f, 3.40f);
+const glm::vec3 POS_CEREZO(-2.60f, 0.0f, 4.30f);
 const glm::vec3 POS_LINTERNA(1.90f, 1.80f, -2.35f);
 const glm::vec3 POS_FAROL(2.00f, 0.0f, 1.20f);
 
@@ -193,7 +193,7 @@ public:
         pintar(incienso, en(POS_INCIENSO), texMadera);
         for (const glm::vec3& p : POS_BOUQUET) pintar(bouquet, en(p), texClaro);
         pintar(tapete, en(POS_TAPETE), texClaro);
-        pintar(cerezo, en(POS_CEREZO), texMadera);
+        pintar(cerezo, glm::scale(rotY(en(POS_CEREZO), 30.0f), glm::vec3(0.85f)), texMadera);
         pintar(linterna, en(POS_LINTERNA), texMadera);
 
         float giro   = animRegistro.valor(V_GIRO);
