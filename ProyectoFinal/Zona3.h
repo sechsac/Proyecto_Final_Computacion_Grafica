@@ -56,6 +56,35 @@ enum { PUERTA_IZQ = 5, PUERTA_DER = 6 };
 enum { BAJADA_Y = 0, V_TORSO, V_CABEZA, V_HOMBRO, V_CODO, V_MUSLO, V_RODILLA };
 
 const float DIST_ALTAR = 2.5f;
+
+// ---------- Modo misión ----------
+const float FIN_ALTAR = 120.0f;           // último keyframe de animAltar
+enum PasoMision { PASO_REVELAR = 0, PASO_MESA, PASO_JEOL, PASO_FIN };
+enum TipoAviso  { AVISO_INFO = 0, AVISO_BIEN, AVISO_ERROR };
+
+struct Pregunta {
+    const char* texto;
+    const char* opciones[3];
+    int         correcta;
+    const char* explicacion;
+    const char* pista;
+};
+
+const Pregunta PREGUNTAS[] = {
+    { "Según la regla Hongdong-baekseo, ¿de qué lado de la mesa van las frutas rojas?",
+      { "Al este", "Al oeste", "Al centro" }, 0,
+      "Correcto: frutas rojas al este (hong-dong) y blancas al oeste (baek-seo).",
+      "Pista: hong = rojo, dong = este." },
+    { "Según Banseo-gaengdong, ¿dónde se coloca el tazón de arroz?",
+      { "Al este", "Al oeste", "Junto al pescado" }, 1,
+      "Correcto: el arroz (ban) va al oeste (seo) y la sopa (gaeng) al este (dong).",
+      "Pista: ban = arroz, seo = oeste." },
+    { "¿Cuál de estos alimentos se evita en la mesa del Jesa?",
+      { "La castaña", "La pera", "El durazno" }, 2,
+      "Correcto: se evitan el durazno, el ajo y el chile, porque se cree que ahuyentan a los espíritus.",
+      "Pista: la castaña y la pera sí aparecen en la regla Jo-yul-i-si." },
+};
+const int NUM_PREGUNTAS = 3;
 const float DIST_COJIN = 2.0f;
 
 inline glm::mat4 rotX(const glm::mat4& m, float g) { return glm::rotate(m, glm::radians(g), glm::vec3(1, 0, 0)); }
@@ -91,6 +120,8 @@ public:
         cojin     = cargarModelo("z3_cojin.obj");
         incensario= cargarModelo("z3_incensario.obj");
         panel     = cargarModelo("z3_biombo_panel.obj");
+        for (int i = 0; i < NUM_PANELES; i++)
+            paneles[i] = cargarModelo("z3_biombo_panel_" + std::to_string(i + 1) + ".obj");
         cofre     = cargarModelo("z3_cofre.obj");
         puertaIzq = cargarModelo("z3_cofre_puerta_izq.obj");
         puertaDer = cargarModelo("z3_cofre_puerta_der.obj");
@@ -120,6 +151,9 @@ public:
         texAzufaifa     = cargarTextura("azufaifa.png");
         texPescado      = cargarTextura("pescado.png");
         texLaton        = cargarTextura("laton.png");
+        texCaqui        = cargarTextura("caqui_piel.png");
+        texTazon        = cargarTextura("porcelana_celadon.png");
+        texTteok        = cargarTextura("garaetteok.png");
 
         const float P = PLEGADO, A = ABIERTO, D = APERTURA_PUERTAS;
 
@@ -173,7 +207,9 @@ public:
     void actualizar(float deltaTime, const glm::vec3& posCamara) {
         camara = posCamara;
         animAltar.actualizar(deltaTime);
+        bool jeolAntes = animJeol.reproduciendo();
         animJeol.actualizar(deltaTime);
+        actualizarMision(deltaTime, jeolAntes && !animJeol.reproduciendo());
 
         int anterior = hotspotCercano;
         hotspotCercano = -1;
@@ -187,12 +223,20 @@ public:
 
     void tecla(int key) {
         using namespace z3;
+        if (key == GLFW_KEY_G) { alternarMision(); return; }
         if (key == GLFW_KEY_I && hotspotCercano >= 0)
             infoAbierta = !infoAbierta;
-        if (key == GLFW_KEY_E && distanciaPiso(camara, origen) < DIST_ALTAR + 1.0f)
+
+        bool cercaAltar = distanciaPiso(camara, origen) < DIST_ALTAR + 1.0f;
+        bool cercaCojin = distanciaPiso(camara, origen + POS_DOLIENTE) < DIST_COJIN;
+
+        if (mision.activa && mision.paso != PASO_FIN) {
+            teclaMision(key, cercaAltar, cercaCojin);
+            return;
+        }
+        if (key == GLFW_KEY_E && cercaAltar)
             animAltar.alternar();
-        if (key == GLFW_KEY_F && distanciaPiso(camara, origen + POS_DOLIENTE) < DIST_COJIN
-            && !animJeol.reproduciendo())
+        if (key == GLFW_KEY_F && cercaCojin && !animJeol.reproduciendo())
             animJeol.reproducir();
     }
 
@@ -245,12 +289,12 @@ public:
         pintar(puertaDer, rotY(glm::translate(mCofre, BISAGRA_DER),  animAltar.valor(PUERTA_DER)), texMaderaOscura);
 
         glm::mat4 mPanel = glm::translate(base, POS_BIOMBO);
-        pintar(panel, mPanel, texPapel);
+        pintar(panelDe(0), mPanel, texPapel);
         for (int i = 1; i < NUM_PANELES; i++) {
             float signo = (i % 2 == 1) ? -1.0f : 1.0f;
             mPanel = glm::translate(mPanel, glm::vec3(ANCHO_PANEL, 0.0f, 0.0f));
             mPanel = rotY(mPanel, signo * animAltar.valor(i - 1));
-            pintar(panel, mPanel, texPapel);
+            pintar(panelDe(i), mPanel, texPapel);
         }
         glm::mat4 mCadera = glm::translate(base,
             POS_DOLIENTE + glm::vec3(0.0f, ALTURA_CADERA + animJeol.valor(BAJADA_Y), 0.0f));
@@ -282,7 +326,9 @@ public:
     }
 
     void dibujarUI() {
+        dibujarMision();
         if (hotspotCercano < 0) return;
+        if (mision.activa && mision.paso == z3::PASO_MESA && hotspotCercano == 1) return;
         const Hotspot& h = hotspots[hotspotCercano];
 
         ImGuiIO& io = ImGui::GetIO();
@@ -312,6 +358,9 @@ private:
     using ModeloPtr = std::unique_ptr<Model>;
 
     ModeloPtr mesa, jegi, manzana, cojin, incensario, panel;
+    ModeloPtr paneles[z3::NUM_PANELES];
+
+    const ModeloPtr& panelDe(int i) const { return paneles[i] ? paneles[i] : panel; }
     ModeloPtr pera, caqui, castana, azufaifa, pescado, platoLargo, tteok, tazonArroz, tazonSopa, copa;
     ModeloPtr cofre, puertaIzq, puertaDer, tableta;
     ModeloPtr cadera, torso, cabeza, brazoIzq, brazoDer, antebrazoIzq, antebrazoDer;
@@ -328,6 +377,200 @@ private:
     int  hotspotCercano = -1;
     bool infoAbierta = false;
     glm::vec3 camara = glm::vec3(0.0f);
+
+    // ================= MODO MISIÓN =================
+    struct EstadoMision {
+        bool  activa = false;
+        int   paso = z3::PASO_REVELAR;
+        int   pregunta = 0;
+        int   reverencias = 0;
+        int   errores = 0;
+        float tiempo = 0.0f;
+        std::string aviso;
+        int   tipoAviso = z3::AVISO_INFO;
+        float tiempoAviso = 0.0f;
+    } mision;
+
+    void avisar(const std::string& texto, int tipo) {
+        mision.aviso = texto;
+        mision.tipoAviso = tipo;
+        mision.tiempoAviso = 5.0f;
+        if (tipo == z3::AVISO_ERROR) mision.errores++;
+    }
+
+    bool altarAbierto() const {
+        return !animAltar.reproduciendo() && animAltar.frame() >= z3::FIN_ALTAR;
+    }
+
+    void alternarMision() {
+        using namespace z3;
+        if (mision.activa) {               // abandonar o cerrar resultados
+            mision.activa = false;
+            return;
+        }
+        mision = EstadoMision();
+        mision.activa = true;
+        if (animAltar.frame() > 0.0f && !animAltar.reproduciendo())
+            animAltar.reproducirReversa();   // el rito empieza con el altar cerrado
+        avisar("Comienza el Jesa. Sigue los pasos del ritual en orden.", AVISO_INFO);
+    }
+
+    void teclaMision(int key, bool cercaAltar, bool cercaCojin) {
+        using namespace z3;
+        switch (mision.paso) {
+        case PASO_REVELAR:
+            if (key == GLFW_KEY_E && cercaAltar && !animAltar.reproduciendo() && !altarAbierto()) {
+                animAltar.reproducir();
+                avisar("Se despliega el biombo y se abre el sinjujip: el ancestro está presente.", AVISO_INFO);
+            }
+            if (key == GLFW_KEY_F && cercaCojin)
+                avisar("Todavía no: primero se revela la tableta del ancestro. Sin ella, la reverencia "
+                       "no tiene a quién dirigirse.", AVISO_ERROR);
+            break;
+
+        case PASO_MESA:
+            if (key == GLFW_KEY_E && cercaAltar)
+                avisar("Durante el rito, el biombo y el cofre permanecen abiertos.", AVISO_INFO);
+            if (key == GLFW_KEY_F && cercaCojin)
+                avisar("Antes de la reverencia hay que verificar que las ofrendas estén bien "
+                       "colocadas. Ve a la mesa.", AVISO_ERROR);
+            if (hotspotCercano == 1 && key >= GLFW_KEY_1 && key <= GLFW_KEY_3)
+                responder(key - GLFW_KEY_1);
+            break;
+
+        case PASO_JEOL:
+            if (key == GLFW_KEY_E && cercaAltar)
+                avisar("Durante el rito, el biombo y el cofre permanecen abiertos.", AVISO_INFO);
+            if (key == GLFW_KEY_F && cercaCojin && !animJeol.reproduciendo())
+                animJeol.reproducir();
+            break;
+        }
+    }
+
+    void responder(int opcion) {
+        using namespace z3;
+        const Pregunta& p = PREGUNTAS[mision.pregunta];
+        if (opcion != p.correcta) {
+            avisar(std::string("Incorrecto. ") + p.pista, AVISO_ERROR);
+            return;
+        }
+        avisar(p.explicacion, AVISO_BIEN);
+        if (++mision.pregunta >= NUM_PREGUNTAS) mision.paso = PASO_JEOL;
+    }
+
+    void actualizarMision(float dt, bool jeolTermino) {
+        using namespace z3;
+        if (mision.tiempoAviso > 0.0f) mision.tiempoAviso -= dt;
+        if (!mision.activa || mision.paso == PASO_FIN) return;
+        mision.tiempo += dt;
+
+        if (mision.paso == PASO_REVELAR && altarAbierto()) {
+            mision.paso = PASO_MESA;
+            avisar("¡Bien! Ahora revisa la mesa de ofrendas (Jesasang).", AVISO_BIEN);
+        }
+        if (mision.paso == PASO_JEOL && jeolTermino) {
+            mision.reverencias++;
+            if (mision.reverencias == 1)
+                avisar("Primera reverencia. En el Jesa la reverencia se hace dos veces: presiona F otra vez.",
+                       AVISO_BIEN);
+            else
+                mision.paso = PASO_FIN;
+        }
+    }
+
+    void dibujarMision() {
+        using namespace z3;
+        ImGuiIO& io = ImGui::GetIO();
+        const ImGuiWindowFlags fijas = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs |
+            ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize;
+        const ImVec4 dorado(0.95f, 0.80f, 0.55f, 1.0f), verde(0.55f, 0.90f, 0.55f, 1.0f),
+                     rojo(1.0f, 0.50f, 0.45f, 1.0f), gris(0.65f, 0.65f, 0.65f, 1.0f);
+
+        bool cercaZona = distanciaPiso(camara, origen) < 6.0f;
+        if (!mision.activa) {
+            if (!cercaZona) return;
+            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 12.0f, 12.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+            ImGui::SetNextWindowBgAlpha(0.55f);
+            ImGui::Begin("##misionInvitacion", nullptr, fijas);
+            ImGui::TextColored(dorado, "Misión: el ritual Jesa");
+            ImGui::TextDisabled("G: comenzar");
+            ImGui::End();
+            return;
+        }
+
+        // Panel de pasos (arriba a la derecha)
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 12.0f, 12.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowBgAlpha(0.75f);
+        ImGui::Begin("##misionPasos", nullptr, fijas);
+        ImGui::TextColored(dorado, "Misión: el ritual Jesa");
+        ImGui::Separator();
+        const char* pasos[3] = {
+            "1. Revela la tableta ancestral (E en el altar)",
+            "2. Revisa la mesa de ofrendas (acércate a la mesa)",
+            "3. Haz la reverencia Jeol dos veces (F en el cojín)" };
+        for (int i = 0; i < 3; i++) {
+            if (i < mision.paso)       ImGui::TextColored(verde, "[x] %s", pasos[i]);
+            else if (i == mision.paso) ImGui::TextColored(dorado, "[ ] %s", pasos[i]);
+            else                       ImGui::TextColored(gris, "[ ] %s", pasos[i]);
+        }
+        if (mision.paso == PASO_MESA) ImGui::TextDisabled("    Preguntas: %d / %d", mision.pregunta, NUM_PREGUNTAS);
+        if (mision.paso == PASO_JEOL) ImGui::TextDisabled("    Reverencias: %d / 2", mision.reverencias);
+        ImGui::Separator();
+        ImGui::TextDisabled("Tiempo: %d s   Errores: %d   G: salir", (int)mision.tiempo, mision.errores);
+        ImGui::End();
+
+        // Pregunta de la mesa (centro de la pantalla)
+        if (mision.paso == PASO_MESA && hotspotCercano == 1) {
+            const Pregunta& p = PREGUNTAS[mision.pregunta];
+            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.55f),
+                                    ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            ImGui::SetNextWindowSize(ImVec2(620.0f, 0.0f), ImGuiCond_Always);
+            ImGui::SetNextWindowBgAlpha(0.88f);
+            ImGui::Begin("##misionPregunta", nullptr, fijas & ~ImGuiWindowFlags_AlwaysAutoResize);
+            ImGui::TextColored(dorado, "Pregunta %d de %d", mision.pregunta + 1, NUM_PREGUNTAS);
+            ImGui::Separator();
+            ImGui::TextWrapped("%s", p.texto);
+            ImGui::Spacing();
+            for (int i = 0; i < 3; i++) ImGui::Text("  %d)  %s", i + 1, p.opciones[i]);
+            ImGui::Spacing();
+            ImGui::TextDisabled("Responde con las teclas 1, 2 o 3");
+            ImGui::End();
+        }
+
+        // Resultado final
+        if (mision.paso == PASO_FIN) {
+            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.40f),
+                                    ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            ImGui::SetNextWindowSize(ImVec2(620.0f, 0.0f), ImGuiCond_Always);
+            ImGui::SetNextWindowBgAlpha(0.90f);
+            ImGui::Begin("##misionFin", nullptr, fijas & ~ImGuiWindowFlags_AlwaysAutoResize);
+            ImGui::TextColored(dorado, "Ritual completado");
+            ImGui::Separator();
+            ImGui::TextWrapped("Revelaste la tableta del ancestro, verificaste la mesa de ofrendas y "
+                               "rendiste la doble reverencia. Con el Jesa, la familia expresa la piedad "
+                               "filial (hyo) y mantiene el vínculo con sus antepasados.");
+            ImGui::Spacing();
+            ImGui::Text("Tiempo: %d s     Errores: %d", (int)mision.tiempo, mision.errores);
+            ImGui::TextColored(mision.errores == 0 ? verde : dorado, "%s",
+                mision.errores == 0 ? "¡Ritual perfecto!" : "Puedes intentarlo de nuevo para no cometer errores.");
+            ImGui::TextDisabled("G: cerrar");
+            ImGui::End();
+        }
+
+        // Aviso temporal (arriba al centro)
+        if (mision.tiempoAviso > 0.0f && !mision.aviso.empty()) {
+            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, 60.0f), ImGuiCond_Always, ImVec2(0.5f, 0.0f));
+            ImGui::SetNextWindowSize(ImVec2(560.0f, 0.0f), ImGuiCond_Always);
+            ImGui::SetNextWindowBgAlpha(0.80f);
+            ImGui::Begin("##misionAviso", nullptr, fijas & ~ImGuiWindowFlags_AlwaysAutoResize);
+            ImVec4 c = mision.tipoAviso == AVISO_BIEN ? verde : (mision.tipoAviso == AVISO_ERROR ? rojo : dorado);
+            ImGui::PushStyleColor(ImGuiCol_Text, c);
+            ImGui::TextWrapped("%s", mision.aviso.c_str());
+            ImGui::PopStyleColor();
+            ImGui::End();
+        }
+    }
 
     template <typename F>
     void dibujarPiramide(F& pintar, const glm::mat4& mPlato, const ModeloPtr& fruta,

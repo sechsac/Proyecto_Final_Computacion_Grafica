@@ -232,7 +232,7 @@ int main()
 		ImGui::SetNextWindowBgAlpha(0.45f);
 		ImGui::Begin("##ayuda", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
 			ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav);
-		ImGui::TextDisabled("WASD: moverse   Ratón: mirar   Esc: salir");
+		ImGui::TextDisabled("WASD: moverse   Ratón: mirar   G: misión Jesa   Esc: salir");
 		ImGui::End();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
